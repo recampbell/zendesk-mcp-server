@@ -222,6 +222,11 @@ import axios from 'axios';
         return this.request('GET', '/search.json', null, { query, ...params });
       }
 
+      // Ticket Comments
+      async getTicketComments(ticketId, params = {}) {
+        return this.request('GET', `/tickets/${ticketId}/comments.json`, null, params);
+      }
+
       // Help Center
       async listArticles(params) {
         return this.request('GET', '/help_center/articles.json', null, params);

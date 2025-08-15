@@ -159,5 +159,42 @@ import { z } from 'zod';
             };
           }
         }
+      },
+      {
+        name: "get_ticket_comments",
+        description: "Get comments for a specific ticket by ID",
+        schema: {
+          id: z.number().describe("Ticket ID"),
+          include: z.string().optional().describe("Additional data to include (e.g., 'users' to side-load users)"),
+          include_inline_images: z.boolean().optional().describe("Include inline images as attachments (default: false)"),
+          sort: z.string().optional().describe("Sort order for cursor pagination: 'created_at' (asc) or '-created_at' (desc)"),
+          sort_order: z.enum(["asc", "desc"]).optional().describe("Sort order for offset pagination (asc or desc)"),
+          per_page: z.number().min(1).max(100).optional().describe("Number of comments per page (1-100, default varies)"),
+          page: z.number().min(1).optional().describe("Page number for offset pagination (minimum 1)")
+        },
+        handler: async ({ id, include, include_inline_images, sort, sort_order, per_page, page }) => {
+          try {
+            const params = {};
+            if (include !== undefined) params.include = include;
+            if (include_inline_images !== undefined) params.include_inline_images = include_inline_images;
+            if (sort !== undefined) params.sort = sort;
+            if (sort_order !== undefined) params.sort_order = sort_order;
+            if (per_page !== undefined) params.per_page = per_page;
+            if (page !== undefined) params.page = page;
+            
+            const result = await zendeskClient.getTicketComments(id, params);
+            return {
+              content: [{ 
+                type: "text", 
+                text: JSON.stringify(result, null, 2)
+              }]
+            };
+          } catch (error) {
+            return {
+              content: [{ type: "text", text: `Error getting ticket comments: ${error.message}` }],
+              isError: true
+            };
+          }
+        }
       }
     ];
